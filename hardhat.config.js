@@ -25,13 +25,13 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
     localhost: {
       url: "http://127.0.0.1:8545"
     },
-  defaultNetwork: "goerli",
+  defaultNetwork: "polygonMumbai",
   networks: {
     hardhat: {
     },
-    goerli: {
-      url: 'https://eth-goerli.g.alchemy.com/v2/QWqIq5wTelorMLGD_J1dcjMjpWPw7qsH',
-      accounts: ['0x92db14e403b83dfe3df233f83dfa3a0d7096f21ca9b0d6d6b8d88b2b4ec1564e']
+    polygonMumbai: {
+      url: '',
+      accounts: ['']
     }
   },
   
@@ -50,6 +50,6 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
   },
   etherscan: {
     apiKey: {
-      goerli: "5QPD69VJWIEG585QZKBN8HNUV3H2TN7ZJV",}
+      goerli: "",}
   },
 };
