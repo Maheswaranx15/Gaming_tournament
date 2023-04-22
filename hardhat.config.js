@@ -36,7 +36,7 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
   },
   
   solidity: {
-    version: "0.8.14",
+    version: "0.8.18",
     settings: {
       optimizer: {
         enabled: true,
@@ -50,6 +50,6 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
   },
   etherscan: {
     apiKey: {
-      goerli: "",}
+      polygonMumbai: "",}
   },
 };

@@ -97,7 +97,7 @@ contract GamingContest is AccessControl {
         return participants;
     }
     // Function to create a new tournament
-    function addTournament(uint256 _lobbySize) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function addTournament(uint256 _lobbySize ) public onlyRole(DEFAULT_ADMIN_ROLE) {
         // Create a new tournament with a unique ID
         uint256 id = tournaments.length + 1;
         tournaments.push(Tournament(id, _lobbySize, 0, 0));
@@ -112,8 +112,8 @@ contract GamingContest is AccessControl {
     function getLeaderboard(uint256 _tournamentId) public view returns(Gamer[] memory) {
         Tournament memory tournament = tournaments[_tournamentId - 1];
         require(block.timestamp > tournament.endTime && tournament.endTime != 0, "Tournament has not ended yet");
-        Gamer[] memory sortedParticipants = sortParticipants(Participants[_tournamentId]);
-        return sortedParticipants;
+        Gamer[] memory shortedlistParticipants = shortlistParticipants(Participants[_tournamentId]);
+        return shortedlistParticipants;
     }    
     // Function to join the tournament 
     function joinTournament(uint256 _tournamentId) public payable  TournamentJoin(_tournamentId) returns(bool) {
@@ -181,7 +181,7 @@ contract GamingContest is AccessControl {
 
 
     // Function to shortlist the participants
-    function sortParticipants(Gamer[] memory _participants) private pure returns (Gamer[] memory) {
+    function shortlistParticipants(Gamer[] memory _participants) private pure returns (Gamer[] memory) {
         for (uint256 i = 0; i < _participants.length - 1; i++) {
             for (uint256 j = i + 1; j < _participants.length; j++) {
                 if (_participants[i].scores < _participants[j].scores) {
