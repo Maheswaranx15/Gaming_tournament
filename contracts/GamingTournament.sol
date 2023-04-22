@@ -199,7 +199,8 @@ contract GamingContest is AccessControl {
         return participants;
     }
     // Function to create a new tournament
-    function addTournament(uint256 _lobbySize ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function createTournament(uint256 _lobbySize ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(_lobbySize >=3 , "lobbySize must be greater than or equal to 3")
         // Create a new tournament with a unique ID
         uint256 id = tournaments.length + 1;
         tournaments.push(Tournament(id, _lobbySize, 0, 0));
