@@ -25,11 +25,16 @@ contract GamingContest is AccessControl {
     Tournament[] public tournaments;
     // Entry fee for the tournament
     uint constant public ENTRY_FEE = 0.2 ether; 
-
+    //Admin
+    address public owner;
     // Duration of a tournament
     uint public constant _duration = 300; 
 
     // Events
+        event OwnershipTransferred(
+        address indexed previousOwner,
+        address indexed newOwner
+    );
     event TournamentCreated(uint256 Tournamentid, uint256 lobbySize);
     event UserAdded(uint256 tournamentId, address user);
     event TournamentStarted(uint256 tournamentId);
@@ -200,7 +205,7 @@ contract GamingContest is AccessControl {
     }
     // Function to create a new tournament
     function createTournament(uint256 _lobbySize ) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(_lobbySize >=3 , "lobbySize must be greater than or equal to 3")
+        require(_lobbySize >=3 , "lobbySize must be greater than or equal to 3");
         // Create a new tournament with a unique ID
         uint256 id = tournaments.length + 1;
         tournaments.push(Tournament(id, _lobbySize, 0, 0));
