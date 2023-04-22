@@ -24,10 +24,11 @@ contract GamingContest is AccessControl {
     // Array to hold all tournaments
     Tournament[] public tournaments;
     // Entry fee for the tournament
-    uint constant public ENTRY_FEE = 1 ether; 
+    uint constant public ENTRY_FEE = 0.2 ether; 
 
     // Duration of a tournament
-    uint public constant _duration = 60; 
+    uint public constant _duration = 300; 
+
     // Events
     event TournamentCreated(uint256 Tournamentid, uint256 lobbySize);
     event UserAdded(uint256 tournamentId, address user);

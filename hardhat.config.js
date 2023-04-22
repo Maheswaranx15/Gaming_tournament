@@ -50,6 +50,7 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
   },
   etherscan: {
     apiKey: {
-      polygonMumbai: "",}
+      polygonMumbai: "",
+    }
   },
 };
