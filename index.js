@@ -14,7 +14,7 @@ const port = 3000;
 // POST route to create a new tournament
 app.post('/tournament', async (req, res) => {
   try {
-    const result = await contractInstance.methods.createTournament(req.body.name, req.body.date).send({ from: '0x123456789abcdef123456789abcdef123456789', gas: 500000 });
+    const result = await contractInstance.methods.createTournament(req.body.name, req.body.date).send({ from: tournamentContract.address, gas: 500000 });
     res.send(result);
   } catch (error) {
     console.error(error);
