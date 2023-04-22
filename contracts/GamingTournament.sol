@@ -66,7 +66,108 @@ contract GamingContest is AccessControl {
         require(block.timestamp < tournament.endTime, "Tournament is already ended!");
         _;
     }
-    // Function to get all active tournaments
+    
+    // Function to Transfer the ownership to others
+    function transferOwnership(address newOwner)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        returns (bool)
+    {
+        require(
+            newOwner != address(0),
+            "Ownable: new owner is the zero address"
+        );
+        _revokeRole(DEFAULT_ADMIN_ROLE, owner);
+        emit OwnershipTransferred(owner, newOwner);
+        owner = newOwner;
+        _setupRole(DEFAULT_ADMIN_ROLE, newOwner);
+        return true;
+    }
+
+    // Function to add  the tournament scores by the individuals only by admin
+    function addScore(uint256 _tournamentId, address _user, uint _score) public calculateScore(_tournamentId) onlyRole(DEFAULT_ADMIN_ROLE) returns(bool _done) {
+        Gamer[] memory user = Participants[_tournamentId];
+   
+        for (uint256 i = 0; i < user.length; i++) {
+            if (user[i].user == _user) {
+                Participants[_tournamentId][i].scores = user[i].scores + _score;
+                return(true);
+            }
+        }
+    }
+    
+    // Airdrop tokens to the winner(s) of a tournament
+    function announceWinner(uint256 _tournamentId) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        // Get the leaderboard for the tournament
+        Gamer[] memory leaderboard = getLeaderboard(_tournamentId);
+
+        // Only distribute rewards if there is at least one participant
+        require(leaderboard.length > 0, "No participants in tournament");
+
+        // Get the total amount of ether to distribute
+        uint256 totalEther = address(this).balance;
+
+        // Calculate the amounts to distribute to each winner
+        uint256 firstPlacePrize = totalEther * 60 / 100;
+        uint256 secondPlacePrize = totalEther * 30 / 100;
+        uint256 thirdPlacePrize = totalEther * 10 / 100;
+
+        // Distribute ether to the top 3 players
+        for (uint256 i = 0; i < leaderboard.length && i < 3; i++) {
+            address payable winner = payable(leaderboard[i].user);
+            if (i == 0) {
+                // First place winner receives 60% of the total prize
+                winner.transfer(firstPlacePrize);
+            } else if (i == 1) {
+                // Second place winner receives 30% of the total prize
+                winner.transfer(secondPlacePrize);
+            } else {
+                // Third place winner receives 10% of the total prize
+                winner.transfer(thirdPlacePrize);
+            }
+        }
+
+        // Emit an event to announce the winners
+        emit WinnersAnnounced(_tournamentId, leaderboard[0].user, leaderboard[1].user, leaderboard[2].user);
+    }
+
+
+    // Function to join the tournament 
+    function joinTournament(uint256 _tournamentId) public payable  TournamentJoin(_tournamentId) returns(bool) {
+        Tournament memory tournament = tournaments[_tournamentId - 1];
+        require(msg.value == ENTRY_FEE, "Entry fee is required");
+        Participants[_tournamentId].push(Gamer(msg.sender, 0));
+
+        emit UserAdded(_tournamentId, msg.sender);
+
+        if (Participants[_tournamentId].length == tournament.lobbySize) {
+            tournament.startTime = block.timestamp;
+            tournament.endTime = block.timestamp + _duration;
+            tournaments[_tournamentId - 1] = tournament;
+            emit TournamentStarted(_tournamentId);
+        }
+
+        return true;
+    }
+
+    // Function to shortlist the participants
+    function shortlistParticipants(Gamer[] memory _participants) private pure returns (Gamer[] memory) {
+        for (uint256 i = 0; i < _participants.length - 1; i++) {
+            for (uint256 j = i + 1; j < _participants.length; j++) {
+                if (_participants[i].scores < _participants[j].scores) {
+                    uint256 tempScore = _participants[i].scores;
+                    address tempAddress = _participants[i].user;
+                    _participants[i].scores = _participants[j].scores;
+                    _participants[i].user = _participants[j].user;
+                    _participants[i].scores = tempScore;
+                    _participants[j].user = tempAddress;
+                }
+            }
+        }
+        return _participants;
+    }
+
+        // Function to get all active tournaments
     function getActiveTournaments() public view returns (Tournament[] memory) {
        // Count the number of active tournaments
         uint256 count = 0;
@@ -116,85 +217,4 @@ contract GamingContest is AccessControl {
         Gamer[] memory shortedlistParticipants = shortlistParticipants(Participants[_tournamentId]);
         return shortedlistParticipants;
     }    
-    // Function to join the tournament 
-    function joinTournament(uint256 _tournamentId) public payable  TournamentJoin(_tournamentId) returns(bool) {
-        Tournament memory tournament = tournaments[_tournamentId - 1];
-        require(msg.value == ENTRY_FEE, "Entry fee is required");
-        Participants[_tournamentId].push(Gamer(msg.sender, 0));
-
-        emit UserAdded(_tournamentId, msg.sender);
-
-        if (Participants[_tournamentId].length == tournament.lobbySize) {
-            tournament.startTime = block.timestamp;
-            tournament.endTime = block.timestamp + _duration;
-            tournaments[_tournamentId - 1] = tournament;
-            emit TournamentStarted(_tournamentId);
-        }
-
-        return true;
-    }
-    // Function to add  the tournament scores by the individuals only by admin
-    function addScore(uint256 _tournamentId, address _user, uint _score) public calculateScore(_tournamentId) onlyRole(DEFAULT_ADMIN_ROLE) returns(bool _done) {
-        Gamer[] memory user = Participants[_tournamentId];
-   
-        for (uint256 i = 0; i < user.length; i++) {
-            if (user[i].user == _user) {
-                Participants[_tournamentId][i].scores = user[i].scores + _score;
-                return(true);
-            }
-        }
-    }
-    
-    // Airdrop tokens to the winner(s) of a tournament
-    function announceWinner(uint256 _tournamentId) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        // Get the leaderboard for the tournament
-        Gamer[] memory leaderboard = getLeaderboard(_tournamentId);
-
-        // Only distribute rewards if there is at least one participant
-        require(leaderboard.length > 0, "No participants in tournament");
-
-        // Get the total amount of ether to distribute
-        uint256 totalEther = address(this).balance;
-
-        // Calculate the amounts to distribute to each winner
-        uint256 firstPlacePrize = totalEther * 60 / 100;
-        uint256 secondPlacePrize = totalEther * 30 / 100;
-        uint256 thirdPlacePrize = totalEther * 10 / 100;
-
-        // Distribute ether to the top 3 players
-        for (uint256 i = 0; i < leaderboard.length && i < 3; i++) {
-            address payable winner = payable(leaderboard[i].user);
-            if (i == 0) {
-                // First place winner receives 60% of the total prize
-                winner.transfer(firstPlacePrize);
-            } else if (i == 1) {
-                // Second place winner receives 30% of the total prize
-                winner.transfer(secondPlacePrize);
-            } else {
-                // Third place winner receives 10% of the total prize
-                winner.transfer(thirdPlacePrize);
-            }
-        }
-
-        // Emit an event to announce the winners
-        emit WinnersAnnounced(_tournamentId, leaderboard[0].user, leaderboard[1].user, leaderboard[2].user);
-    }
-
-
-    // Function to shortlist the participants
-    function shortlistParticipants(Gamer[] memory _participants) private pure returns (Gamer[] memory) {
-        for (uint256 i = 0; i < _participants.length - 1; i++) {
-            for (uint256 j = i + 1; j < _participants.length; j++) {
-                if (_participants[i].scores < _participants[j].scores) {
-                    uint256 tempScore = _participants[i].scores;
-                    address tempAddress = _participants[i].user;
-                    _participants[i].scores = _participants[j].scores;
-                    _participants[i].user = _participants[j].user;
-                    _participants[i].scores = tempScore;
-                    _participants[j].user = tempAddress;
-                }
-            }
-        }
-        return _participants;
-    }
 }
