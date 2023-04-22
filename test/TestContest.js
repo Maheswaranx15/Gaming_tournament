@@ -19,9 +19,9 @@ describe("Gaming Tournament Contest", function () {
       console.log(`Contract Address : `,GamingInstance.address);
     });
 
-    it(`addTournament Function`,async()=>{
+    it(`createTournament Function`,async()=>{
       const [owner,user1,user2] = await ethers.getSigners();
-      let add = await GamingInstance.connect(owner).addTournament(participants)
+      let add = await GamingInstance.connect(owner).createTournament(participants)
     })
 
     it(`JoinTournament Function`,async()=>{
@@ -34,8 +34,6 @@ describe("Gaming Tournament Contest", function () {
       await GamingInstance.connect(user4).joinTournament(tournamentID,{value : entryfee})
 
     })
-
-
 
     it(`addScore Function`,async()=>{
       let tournamentID = 1

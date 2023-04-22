@@ -5,6 +5,7 @@
 // will compile your contracts, add the Hardhat Runtime Environment's members to the
 // global scope, and execute the script.
 const hre = require("hardhat");
+const fs = require("fs");
 
 async function main() {
 
@@ -15,6 +16,14 @@ async function main() {
   console.log(
     `Tournament Gaming contract deployment address`, contest.address
   );
+
+
+  const GamingContestdata = {
+    address: contest.address,
+    abi: JSON.parse(contest.interface.format('json'))
+  }
+
+  fs.writeFileSync('./GameTournament.json', JSON.stringify(GamingContestdata))
 
   //Verify the smart contract using hardhat 
   await hre.run("verify:verify", {

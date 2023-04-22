@@ -12,7 +12,9 @@
     "@openzeppelin/contracts": "^4.8.3",
     "@openzeppelin/test-helpers": "^0.5.16",
     "dotenv": "^16.0.3",
+    "fs": "^0.0.1-security",
     "hardhat-gas-reporter": "^1.0.9",
-    "solidity-coverage": "^0.8.2"
+    "solidity-coverage": "^0.8.2",
+    "web3": "^1.9.0"
   }
 }

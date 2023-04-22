@@ -29,7 +29,8 @@ contract GamingContest is AccessControl {
     address public owner;
     // Duration of a tournament
     uint public constant _duration = 300; 
-
+    //ADMIN_ROLE Access Controller
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
     // Events
         event OwnershipTransferred(
         address indexed previousOwner,
@@ -40,9 +41,11 @@ contract GamingContest is AccessControl {
     event TournamentStarted(uint256 tournamentId);
     event WinnersAnnounced(uint256 tournamentId,address winner,address runner,address third);
 
-    // Constructor that grants the default admin role to the contract deployer
+    // Constructor that grants the  admin role to the contract deployer
     constructor() {
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _setupRole(ADMIN_ROLE, msg.sender);
+        owner = msg.sender;
+
     }
 
     // Modifier that checks if a user can join a tournament
@@ -75,22 +78,22 @@ contract GamingContest is AccessControl {
     // Function to Transfer the ownership to others
     function transferOwnership(address newOwner)
         external
-        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRole(ADMIN_ROLE)
         returns (bool)
     {
         require(
             newOwner != address(0),
             "Ownable: new owner is the zero address"
         );
-        _revokeRole(DEFAULT_ADMIN_ROLE, owner);
+        _revokeRole(ADMIN_ROLE, owner);
         emit OwnershipTransferred(owner, newOwner);
         owner = newOwner;
-        _setupRole(DEFAULT_ADMIN_ROLE, newOwner);
+        _setupRole(ADMIN_ROLE, newOwner);
         return true;
     }
 
     // Function to add  the tournament scores by the individuals only by admin
-    function addScore(uint256 _tournamentId, address _user, uint _score) public calculateScore(_tournamentId) onlyRole(DEFAULT_ADMIN_ROLE) returns(bool _done) {
+    function addScore(uint256 _tournamentId, address _user, uint _score) public calculateScore(_tournamentId) onlyRole(ADMIN_ROLE) returns(bool _done) {
         Gamer[] memory user = Participants[_tournamentId];
    
         for (uint256 i = 0; i < user.length; i++) {
@@ -102,7 +105,7 @@ contract GamingContest is AccessControl {
     }
     
     // Airdrop tokens to the winner(s) of a tournament
-    function announceWinner(uint256 _tournamentId) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function announceWinner(uint256 _tournamentId) public onlyRole(ADMIN_ROLE) {
         // Get the leaderboard for the tournament
         Gamer[] memory leaderboard = getLeaderboard(_tournamentId);
 
@@ -204,7 +207,7 @@ contract GamingContest is AccessControl {
         return participants;
     }
     // Function to create a new tournament
-    function createTournament(uint256 _lobbySize ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function createTournament(uint256 _lobbySize ) public onlyRole(ADMIN_ROLE) {
         require(_lobbySize >=3 , "lobbySize must be greater than or equal to 3");
         // Create a new tournament with a unique ID
         uint256 id = tournaments.length + 1;
