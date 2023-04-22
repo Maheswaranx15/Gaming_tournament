@@ -22,6 +22,17 @@ app.post('/tournament', async (req, res) => {
   }
 });
 
+app.get('/tournaments', async (req, res) => {
+    try {
+      const events = await contractInstance.getPastEvents('TournamentCreated', { fromBlock: 0 });
+      const tournaments = events.map(event => event.returnValues.tournamentId);
+      res.json(tournaments);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
 // GET route to retrieve leaderboard information
 app.get('/leaderboard', async (req, res) => {
   try {
